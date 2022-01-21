@@ -636,8 +636,9 @@ static Vector<SizedFile> ReadCorpora(const Vector<std::string> &CorpusDirs,
   return SizedFiles;
 }
 
-int FuzzerDriver(int *argc, char ***argv, UserCallback Callback) {
+int FuzzerDriver(int *argc, char ***argv, UserCallback Callback, uint8_t *Counters, size_t CountersSize) {
   using namespace fuzzer;
+  SetExtraCounters(Counters, Counters + CountersSize);
   assert(argc && argv && "Argument pointers cannot be nullptr");
   std::string Argv0((*argv)[0]);
   EF = new ExternalFunctions();
@@ -915,8 +916,8 @@ int FuzzerDriver(int *argc, char ***argv, UserCallback Callback) {
 
 extern "C" ATTRIBUTE_INTERFACE int
 LLVMFuzzerRunDriver(int *argc, char ***argv,
-                    int (*UserCb)(const uint8_t *Data, size_t Size)) {
-  return FuzzerDriver(argc, argv, UserCb);
+                    int (*UserCb)(const uint8_t *Data, size_t Size), uint8_t* Counters, size_t CountersSize) {
+  return FuzzerDriver(argc, argv, UserCb, Counters, CountersSize);
 }
 
 // Storage for global ExternalFunctions object.

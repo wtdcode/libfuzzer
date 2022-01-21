@@ -26,9 +26,20 @@ set(LIBFUZZER_SOURCES
   compiler-rt/lib/fuzzer/FuzzerUtilPosix.cpp
   compiler-rt/lib/fuzzer/FuzzerUtilWindows.cpp)
 
-# We only support Linux currently.
-set(LIBFUZZER_CFLAGS "-DFUZZER_LINUX -g -O2 -fno-omit-frame-pointer -std=c++11")
+set (CMAKE_CXX_STANDARD 11)
 
-add_library(fuzzer_no_main SHARED ${LIBFUZZER_SOURCES})
+if (LINUX)
+set(LIBFUZZER_CFLAGS "-fno-omit-frame-pointer")
+endif()
 
-target_compile_options(fuzzer_no_main PRIVATE ${LIBFUZZER_CFLAGS})
+# Enable shared memory for extra counters
+set(LIBFUZZER_CFLAGS "-DLIBFUZZER_SHAREDMEM")
+
+add_library(fuzzer SHARED ${LIBFUZZER_SOURCES})
+
+target_include_directories(fuzzer PUBLIC include/)
+target_include_directories(fuzzer PRIVATE compiler-rt/lib/fuzzer/)
+target_compile_options(fuzzer PRIVATE ${LIBFUZZER_CFLAGS})
+
+add_executable(example example/main.c)
+target_link_libraries(example fuzzer)

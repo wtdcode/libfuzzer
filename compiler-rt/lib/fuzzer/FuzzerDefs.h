@@ -62,8 +62,9 @@ typedef Vector<uint8_t> Unit;
 typedef Vector<Unit> UnitVector;
 typedef int (*UserCallback)(const uint8_t *Data, size_t Size);
 
-int FuzzerDriver(int *argc, char ***argv, UserCallback Callback);
+int FuzzerDriver(int *argc, char ***argv, UserCallback Callback, uint8_t *Counters, size_t CountersSize);
 
+void SetExtraCounters(uint8_t *Begin, uint8_t* End);
 uint8_t *ExtraCountersBegin();
 uint8_t *ExtraCountersEnd();
 void ClearExtraCounters();

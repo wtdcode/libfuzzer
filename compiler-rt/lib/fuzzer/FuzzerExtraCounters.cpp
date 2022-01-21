@@ -11,14 +11,18 @@
 #include "FuzzerPlatform.h"
 #include <cstdint>
 
-#if LIBFUZZER_LINUX || LIBFUZZER_NETBSD || LIBFUZZER_FREEBSD ||                \
-    LIBFUZZER_FUCHSIA || LIBFUZZER_EMSCRIPTEN
-__attribute__((weak)) extern uint8_t __start___libfuzzer_extra_counters;
-__attribute__((weak)) extern uint8_t __stop___libfuzzer_extra_counters;
-
 namespace fuzzer {
-uint8_t *ExtraCountersBegin() { return &__start___libfuzzer_extra_counters; }
-uint8_t *ExtraCountersEnd() { return &__stop___libfuzzer_extra_counters; }
+
+static uint8_t *CountersBegin;
+static uint8_t *CountersEnd;
+
+void SetExtraCounters(uint8_t *Begin, uint8_t *End) {
+  CountersBegin = Begin;
+  CountersEnd = End;
+}
+
+uint8_t *ExtraCountersBegin() { return CountersBegin; }
+uint8_t *ExtraCountersEnd() { return CountersEnd; }
 ATTRIBUTE_NO_SANITIZE_ALL
 void ClearExtraCounters() {  // hand-written memset, don't asan-ify.
   uintptr_t *Beg = reinterpret_cast<uintptr_t*>(ExtraCountersBegin());
@@ -30,13 +34,3 @@ void ClearExtraCounters() {  // hand-written memset, don't asan-ify.
 }
 
 }  // namespace fuzzer
-
-#else
-// TODO: implement for other platforms.
-namespace fuzzer {
-uint8_t *ExtraCountersBegin() { return nullptr; }
-uint8_t *ExtraCountersEnd() { return nullptr; }
-void ClearExtraCounters() {}
-}  // namespace fuzzer
-
-#endif
