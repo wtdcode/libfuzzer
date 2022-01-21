@@ -19,5 +19,5 @@ int Test(const uint8_t *p, size_t s) {
 }
 
 int main(int argc, char** argv) {
-    LLVMFuzzerRunDriver(&argc, &argv, Test, (char*)Counters, 4096);
+    LLVMFuzzerRunDriver(&argc, &argv, Test, (uint8_t *)Counters, 4096);
 }
