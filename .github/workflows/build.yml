@@ -13,4 +13,4 @@ jobs:
       run: mkdir build && cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug && cmake --build build
     
     - name: Test a naive target
-      run: cd build && ./example && ls | grep crash
+      run: cd build && (./example || true) && ls | grep crash
