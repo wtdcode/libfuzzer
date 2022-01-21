@@ -125,6 +125,7 @@ import sys
 Counters = CreateLibFuzzerCounters(4096)
 
 def TestOneInput(input: bytes):
+    # Instrument the code manually.
     l = len(input)
 
     if l == 0:
