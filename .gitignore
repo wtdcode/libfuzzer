@@ -5,3 +5,7 @@ crash-*
 .vscode
 *.egg-info
 *.pyc
+*.so
+*.dylib
+bindings/python/include
+bindings/python/lib
