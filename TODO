@@ -2,3 +2,4 @@ TODO
  - remove warnings
  - remove useless cov update & merge to speedup
  - Add support for macos and windows
+ - Enable more tracing for TracePC
