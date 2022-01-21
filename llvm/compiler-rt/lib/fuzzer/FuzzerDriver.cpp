@@ -29,6 +29,8 @@
 #include <thread>
 #include <fstream>
 
+#include "LibFuzzer.h"
+
 // This function should be present in the libFuzzer so that the client
 // binary can test for its existence.
 #if LIBFUZZER_MSVC
@@ -636,12 +638,17 @@ static Vector<SizedFile> ReadCorpora(const Vector<std::string> &CorpusDirs,
   return SizedFiles;
 }
 
-int FuzzerDriver(int *argc, char ***argv, UserCallback Callback, uint8_t *Counters, size_t CountersSize) {
+int FuzzerDriver(int *argc, char ***argv, UserCallback Callback, 
+                 InitializeCallback InitCb, CustomMutatorCallback MutCb,
+                 CustomCrossOverCallback CrossCb, uint8_t *Counters, size_t CountersSize) {
   using namespace fuzzer;
   SetExtraCounters(Counters, Counters + CountersSize);
   assert(argc && argv && "Argument pointers cannot be nullptr");
   std::string Argv0((*argv)[0]);
   EF = new ExternalFunctions();
+  EF->LLVMFuzzerInitialize = InitCb;
+  EF->LLVMFuzzerCustomMutator = MutCb;
+  EF->LLVMFuzzerCustomCrossOver = CrossCb;
   if (EF->LLVMFuzzerInitialize)
     EF->LLVMFuzzerInitialize(argc, argv);
   if (EF->__msan_scoped_disable_interceptor_checks)
@@ -915,9 +922,11 @@ int FuzzerDriver(int *argc, char ***argv, UserCallback Callback, uint8_t *Counte
 }
 
 extern "C" ATTRIBUTE_INTERFACE int
-LLVMFuzzerRunDriver(int *argc, char ***argv,
-                    int (*UserCb)(const uint8_t *Data, size_t Size), uint8_t* Counters, size_t CountersSize) {
-  return FuzzerDriver(argc, argv, UserCb, Counters, CountersSize);
+LLVMFuzzerRunDriver(int *argc, char ***argv, TestOneInputCallback UserCb,
+                    InitializeCallback InitCb, CustomMutatorCallback MutCb,
+                    CustomCrossOverCallback CrossCb, uint8_t *Counters,
+                    size_t CountersSize) {
+  return FuzzerDriver(argc, argv, (UserCallback)UserCb, InitCb, MutCb, CrossCb, Counters, CountersSize);
 }
 
 // Storage for global ExternalFunctions object.
