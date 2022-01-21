@@ -160,7 +160,6 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url='https://github.com/wtdcode/libfuzzer',
     classifiers=[
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
     ],
     requires=['ctypes'],
