@@ -13,28 +13,28 @@ endif()
 option(BUILD_SHARED_LIBS "Build shared instead of static library" ${PROJECT_IS_TOP_LEVEL})
 
 set(LIBFUZZER_SOURCES
-  compiler-rt/lib/fuzzer/FuzzerCrossOver.cpp
-  compiler-rt/lib/fuzzer/FuzzerDataFlowTrace.cpp
-  compiler-rt/lib/fuzzer/FuzzerDriver.cpp
-  compiler-rt/lib/fuzzer/FuzzerExtFunctionsDlsym.cpp
-  compiler-rt/lib/fuzzer/FuzzerExtFunctionsWeak.cpp
-  compiler-rt/lib/fuzzer/FuzzerExtFunctionsWindows.cpp
-  compiler-rt/lib/fuzzer/FuzzerExtraCounters.cpp
-  compiler-rt/lib/fuzzer/FuzzerFork.cpp
-  compiler-rt/lib/fuzzer/FuzzerIO.cpp
-  compiler-rt/lib/fuzzer/FuzzerIOPosix.cpp
-  compiler-rt/lib/fuzzer/FuzzerIOWindows.cpp
-  compiler-rt/lib/fuzzer/FuzzerLoop.cpp
-  compiler-rt/lib/fuzzer/FuzzerMerge.cpp
-  compiler-rt/lib/fuzzer/FuzzerMutate.cpp
-  compiler-rt/lib/fuzzer/FuzzerSHA1.cpp
-  compiler-rt/lib/fuzzer/FuzzerTracePC.cpp
-  compiler-rt/lib/fuzzer/FuzzerUtil.cpp
-  compiler-rt/lib/fuzzer/FuzzerUtilDarwin.cpp
-  compiler-rt/lib/fuzzer/FuzzerUtilFuchsia.cpp
-  compiler-rt/lib/fuzzer/FuzzerUtilLinux.cpp
-  compiler-rt/lib/fuzzer/FuzzerUtilPosix.cpp
-  compiler-rt/lib/fuzzer/FuzzerUtilWindows.cpp)
+  llvm/compiler-rt/lib/fuzzer/FuzzerCrossOver.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerDataFlowTrace.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerDriver.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerExtFunctionsDlsym.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerExtFunctionsWeak.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerExtFunctionsWindows.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerExtraCounters.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerFork.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerIO.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerIOPosix.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerIOWindows.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerLoop.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerMerge.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerMutate.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerSHA1.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerTracePC.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerUtil.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerUtilDarwin.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerUtilFuchsia.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerUtilLinux.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerUtilPosix.cpp
+  llvm/compiler-rt/lib/fuzzer/FuzzerUtilWindows.cpp)
 
 set (CMAKE_CXX_STANDARD 11)
 
@@ -45,7 +45,7 @@ endif()
 add_library(fuzzer ${LIBFUZZER_SOURCES})
 
 target_include_directories(fuzzer PUBLIC include/)
-target_include_directories(fuzzer PRIVATE compiler-rt/lib/fuzzer/)
+target_include_directories(fuzzer PRIVATE llvm/compiler-rt/lib/fuzzer/)
 target_compile_options(fuzzer PRIVATE ${LIBFUZZER_CFLAGS})
 
 if (UNIX)
