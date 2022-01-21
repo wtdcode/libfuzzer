@@ -1,0 +1,7 @@
+build/
+build_python/
+crash-*
+.gdb_history
+.vscode
+*.egg-info
+*.pyc
