@@ -2,6 +2,16 @@ cmake_minimum_required(VERSION 3.10)
 
 project(libfuzzer)
 
+set(PROJECT_IS_TOP_LEVEL OFF)
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    set(PROJECT_IS_TOP_LEVEL ON)
+    
+    # Enable folder support
+    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+endif()
+
+option(BUILD_SHARED_LIBS "Build shared instead of static library" ${PROJECT_IS_TOP_LEVEL})
+
 set(LIBFUZZER_SOURCES
   compiler-rt/lib/fuzzer/FuzzerCrossOver.cpp
   compiler-rt/lib/fuzzer/FuzzerDataFlowTrace.cpp
@@ -32,10 +42,7 @@ if (UNIX)
 set(LIBFUZZER_CFLAGS "-fno-omit-frame-pointer")
 endif()
 
-# Enable shared memory for extra counters
-set(LIBFUZZER_CFLAGS "-DLIBFUZZER_SHAREDMEM")
-
-add_library(fuzzer SHARED ${LIBFUZZER_SOURCES})
+add_library(fuzzer ${LIBFUZZER_SOURCES})
 
 target_include_directories(fuzzer PUBLIC include/)
 target_include_directories(fuzzer PRIVATE compiler-rt/lib/fuzzer/)
