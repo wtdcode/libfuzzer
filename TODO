@@ -2,4 +2,5 @@ TODO
  - remove warnings
  - remove useless cov update & merge to speedup
  - Add support for macos and windows
- - Enable more tracing for TracePC
+ - Enable more tracing for TracePC (Could we just update extra counters??? Or expose TracePC state???)
+ - Achieve something like atheris?
