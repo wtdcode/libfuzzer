@@ -1,0 +1,16 @@
+name: Build libfuzzer
+
+on:
+  push:
+
+jobs:
+  Linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build libfuzzer
+      run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Debug
+    
+    - name: Test a naive target
+      run: cd build && ./example && ls | grep crash
