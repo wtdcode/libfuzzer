@@ -11,7 +11,7 @@ LLVMFuzzerRunDriver(int *argc, char ***argv,
                     uint8_t *Counters, size_t CountersSize);
 ```
 
-With a little hack, this version of libfuzzer exposes the extra counters in `LLVMFuzzerRunDriver`, which make it esay to use libfuzzer as a librray.
+With a little hack, this version of libfuzzer exposes the extra counters in `LLVMFuzzerRunDriver`, which make it esay to use libfuzzer as a libray.
 
 ## Example
 
