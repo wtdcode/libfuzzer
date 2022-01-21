@@ -3,10 +3,18 @@
 static uint8_t Counters[4096];
 
 int Test(const uint8_t *p, size_t s) {
-    if (s == 16) {
+    // Instrument the code manually.
+    if (s == 0) {
+        Counters[0]++;
+    } else if (s == 8) {
+        Counters[1]++;
+    } else if (s == 16) {
+        Counters[2]++;
         abort();
+    } else {
+        Counters[3]++;
     }
-    Counters[s]++;
+    Counters[4]++;
     return 0;
 }
 
