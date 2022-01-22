@@ -60,7 +60,7 @@ jobs:
         fi
     
     - name: '🚧 Test build'
-      run: cd bindings/python && rm ../../build_python && pip install -e . && ( python example.py  || true ) && ls | grep crash
+      run: cd bindings/python && rm -rf ../../build_python && pip install -e . && ( python example.py  || true ) && ls | grep crash
 
     - name: '📤 Upload artifact'
       uses: actions/upload-artifact@v2
