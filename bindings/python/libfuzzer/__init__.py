@@ -1,1 +1,1 @@
-from .libfuzzer import CreateLibFuzzerCounters, LLVMFuzzerRunDriver
+from .libfuzzer import CreateLibFuzzerCounters, LLVMFuzzerRunDriver, LLVMFuzzerMutate

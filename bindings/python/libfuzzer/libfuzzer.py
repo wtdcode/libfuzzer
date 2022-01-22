@@ -37,23 +37,61 @@ for _p in _path_list:
 else:
     raise ImportError("Fail to load the dynamic library for libfuzzer.")
 
-# FUZZER_INTERFACE_VISIBILITY int
-# LLVMFuzzerRunDriver(int *argc, char ***argv,
-#                     int (*UserCb)(const uint8_t *Data, size_t Size),
-#                     uint8_t *Counters, size_t CountersSize);
+PArgcType = ctypes.POINTER(ctypes.c_int)
+PArgvType = ctypes.POINTER(ctypes.POINTER(ctypes.c_char_p))
+PUint8 = ctypes.c_void_p # By design to reduce ctypes.cast
 
 _libfuzzer.LLVMFuzzerRunDriver.restype = ctypes.c_int
-_libfuzzer.LLVMFuzzerRunDriver.argtypes = (ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t)
+_libfuzzer.LLVMFuzzerRunDriver.argtypes = (ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t)
+_libfuzzer.LLVMFuzzerMutate.restype = ctypes.c_size_t
+_libfuzzer.LLVMFuzzerMutate.argtypes = (ctypes.c_void_p, ctypes.c_size_t, ctypes.c_size_t)
 
-USERCB = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_void_p, ctypes.c_size_t)
+
+TestOneInputCB = ctypes.CFUNCTYPE(ctypes.c_int, PUint8, ctypes.c_size_t)
+InitializeCB = ctypes.CFUNCTYPE(ctypes.c_int, PArgcType, PArgvType)
+CustomMutatorCB = ctypes.CFUNCTYPE(ctypes.c_size_t, PUint8, ctypes.c_size_t, ctypes.c_size_t, ctypes.c_uint)
+CustomCrossOverCB = ctypes.CFUNCTYPE(ctypes.c_size_t,
+    PUint8, ctypes.c_size_t,
+    PUint8, ctypes.c_size_t, 
+    PUint8, ctypes.c_size_t, 
+    ctypes.c_uint)
 
 def CreateLibFuzzerCounters(Size: int):
     return (ctypes.c_uint8 * Size)()
 
-def LLVMFuzzerRunDriver(Argv: List[str], TestOneInputCallback: Callable[[bytes], int], Counters: ctypes.Array):
+def LLVMFuzzerMutate(Data: ctypes.Array, MaxSize: int):
+
+    return _libfuzzer.LLVMFuzzerMutate(Data, len(Data), MaxSize)
+
+def LLVMFuzzerRunDriver(Argv: List[str],
+                        TestOneInputCallback: Callable[[ctypes.Array], int], 
+                        InitializeCallback: Callable[[List[ctypes.c_char_p]], int],
+                        CustomMutatorCallback: Callable[[ctypes.Array, int, int], int],
+                        CustomCrossOverCallback: Callable[[ctypes.Array, ctypes.Array, ctypes.Array, int], int],
+                        Counters: ctypes.Array):
     
-    def _callback_wrapper(bs, sz):
-        return TestOneInputCallback(bytes((ctypes.c_char * sz).from_address(bs)))
+    def _test_one_input_wrapper(data: PUint8, size: int):
+        return TestOneInputCallback((ctypes.c_uint8 * size).from_address(data))
+
+    def _initialize_wrapper(pargc: PArgcType, pargv: PArgvType):
+        argc = pargc.contents.value
+        argv = (ctypes.c_char_p * (argc + 1)).from_address(ctypes.cast(pargv.contents, ctypes.c_void_p).value)
+        return InitializeCallback(argv)
+    
+    def _custom_mutator_wrapper(data: PUint8, size: int, max_size: int, seed: int):
+        return CustomMutatorCallback((ctypes.c_uint8 * size).from_address(data), max_size, seed)
+    
+    def _custom_cross_over_wrapper(
+        data1: PUint8, size1: int, 
+        data2: PUint8, size2: int, 
+        out: PUint8, out_size: int, 
+        seed: int):
+        return CustomCrossOverCallback(
+            (ctypes.c_uint8 * size1).from_address(data1),
+            (ctypes.c_uint8 * size2).from_address(data2),
+            (ctypes.c_uint8 * out_size).from_address(out),
+            seed
+        )
 
     argc = ctypes.c_int(len(Argv))
     argv = (ctypes.c_void_p * (len(Argv) + 1))()
@@ -61,13 +99,18 @@ def LLVMFuzzerRunDriver(Argv: List[str], TestOneInputCallback: Callable[[bytes],
     for idx, arg in enumerate(Argv):
         argv[idx] = ctypes.cast(ctypes.create_string_buffer(arg.encode("utf-8")), ctypes.c_void_p)
 
-    # ctypes.cast(argv, ctypes.c_void_p) -> char** (remember argv is an array!)
+    # ctypes.cast(argv, ctypes.c_void_p) -> char** (recall argv was an array!) &(char*[]) -> char**
     argv = ctypes.cast(argv, ctypes.c_void_p)
-    # now ctypes.cast(argv, ctypes.c_void_p) -> char*** (argv now is a pointer)
-    
+    # ctypes.cast(argv, ctypes.c_void_p) -> char*** since argv is a pointer now &char** -> char***
+
+    refs = (TestOneInputCB(_test_one_input_wrapper), InitializeCB(_initialize_wrapper), CustomMutatorCB(_custom_mutator_wrapper), CustomCrossOverCB(_custom_cross_over_wrapper))
+
     return _libfuzzer.LLVMFuzzerRunDriver(
         ctypes.cast(ctypes.addressof(argc), ctypes.c_void_p), 
         ctypes.cast(ctypes.addressof(argv), ctypes.c_void_p), 
-        ctypes.cast(USERCB(_callback_wrapper), ctypes.c_void_p), 
+        ctypes.cast(refs[0], ctypes.c_void_p),
+        ctypes.cast(refs[1], ctypes.c_void_p),
+        ctypes.cast(refs[2], ctypes.c_void_p),
+        ctypes.cast(refs[3], ctypes.c_void_p),
         ctypes.cast(Counters, ctypes.c_void_p), 
         len(Counters))

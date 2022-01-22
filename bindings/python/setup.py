@@ -24,7 +24,7 @@ HEADERS_DIR = ROOT_DIR / 'libfuzzer' / 'include'
 SRC_DIR = ROOT_DIR / '..' / '..'
 BUILD_DIR = SRC_DIR / 'build_python'
 
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 
 if SYSTEM == 'darwin':
     LIBRARY_FILE = "libfuzzer.dylib"
@@ -124,7 +124,7 @@ import sys
 
 Counters = CreateLibFuzzerCounters(4096)
 
-def TestOneInput(input: bytes):
+def TestOneInput(input):
     # Instrument the code manually.
     l = len(input)
 
@@ -141,9 +141,18 @@ def TestOneInput(input: bytes):
     Counters[4] += 1
     return 0
 
+def Initialize(argv):
+    return 0
+
+def Mutator(data, max_size, seed):
+    return LLVMFuzzerMutate(data, max_size)
+
+def CrossOver(data1, data2, out, seed):
+    return 0
+
 # If you are using -fork=1, make sure run it like `python3 ./example.py` or
 # `./example.py` instead of `python3 example.py`.
-LLVMFuzzerRunDriver(sys.argv, TestOneInput, Counters)
+LLVMFuzzerRunDriver(sys.argv, TestOneInput, Initialize, Mutator, CrossOver, Counters)
 ```
 
 '''
