@@ -164,7 +164,7 @@ setuptools.setup(
     version=VERSION,
     author='Lazymio',
     author_email='mio@lazym.io',
-    description='libfuzzer',
+    description='Raw bindings for a modified version of libfuzzer.',
     long_description=long_desc,
     long_description_content_type="text/markdown",
     url='https://github.com/wtdcode/libfuzzer',
