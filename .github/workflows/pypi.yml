@@ -58,6 +58,9 @@ jobs:
         else
               cd bindings/python && python setup.py bdist_wheel
         fi
+    
+    - name: '🚧 Test build'
+      run: cd bindings/python && pip install -e . && ( python example.py  || true ) && ls | grep crash
 
     - name: '📤 Upload artifact'
       uses: actions/upload-artifact@v2
